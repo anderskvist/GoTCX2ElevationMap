@@ -45,4 +45,7 @@ func main() {
 	if *activityId < 0 || *lapId < 0 {
 		showAll(db)
 	}
+
+	fmt.Printf("%+v\n", db.Acts.Act[*activityId])
+
 }
