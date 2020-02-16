@@ -27,6 +27,33 @@ func showAll(db *tcx.TCXDB) {
 	}
 }
 
+func deleteOne(data []Data) []Data {
+	var prev Data
+	var smallestDist = 9999.0
+	var smallestId = 0
+
+	for id, temp := range data {
+		if prev.Distance == 0 && prev.Altitude == 0 {
+			prev = temp
+			continue
+		}
+
+		calcDist := temp.Distance - prev.Distance
+
+		if calcDist < smallestDist {
+			smallestDist = calcDist
+			smallestId = id
+		}
+		prev = temp
+	}
+
+	copy(data[smallestId:], data[smallestId+1:]) // Shift a[i+1:] left one index.
+	data[len(data)-1] = Data{}                   // Erase last element (write zero value).
+	data = data[:len(data)-1]                    // Truncate slice.
+
+	return data
+}
+
 // Data is a struct to hold relevant data
 type Data struct {
 	Distance float64
@@ -45,6 +72,8 @@ func main() {
 	var tcxFile = flag.String("t", "", "TCX file to be read")
 	var activityID = flag.Int("a", -1, "Activity for elevation map")
 	var lapID = flag.Int("l", -1, "Lap for elevation map")
+	var simplify = flag.Int("s", -1, "Simplify by removing N% of trackpoints")
+
 	flag.Parse()
 
 	if *tcxFile == "" {
@@ -112,6 +141,13 @@ func main() {
 	// for some reason, the TCX trackpoint data isn't in the correct order, so we need to sort it to make sure it's okay
 	sort.Sort(ByDistance(data))
 
+	if *simplify > 0 {
+		var delete = int(len(data) * *simplify / 100)
+		// slow as hell, but still quick enough
+		for i := 0; i < delete; i++ {
+			data = deleteOne(data)
+		}
+	}
 	file, err := os.Create("test.svg")
 	if err != nil {
 		fmt.Println("Cannot write to test.svg")
