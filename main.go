@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sort"
 
 	tcx "github.com/philhofer/tcx"
 )
@@ -24,6 +25,17 @@ func showAll(db *tcx.TCXDB) {
 		}
 	}
 }
+
+type Data struct {
+	Distance float64
+	Altitude float64
+}
+
+type ByDistance []Data
+
+func (a ByDistance) Len() int           { return len(a) }
+func (a ByDistance) Less(i, j int) bool { return a[i].Distance < a[j].Distance }
+func (a ByDistance) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 
 func main() {
 
@@ -61,10 +73,19 @@ func main() {
 
 	lap := activity.Laps[*lapId]
 
+	data := []Data{}
+
 	for _, trackpoint := range lap.Trk.Pt {
 		// remove invalid trackpoints from tcx parsing
 		if trackpoint.Alt != 0 {
-			fmt.Printf("test: %.0fm - %.0fm\n", trackpoint.Dist, trackpoint.Alt)
+			data = append(data, Data{Distance: trackpoint.Dist, Altitude: trackpoint.Alt})
 		}
+	}
+
+	// for some reason, the TCX trackpoint data isn't in the correct order, so we need to sort it to make sure it's okay
+	sort.Sort(ByDistance(data))
+
+	for _, trackpoint := range data {
+		fmt.Printf("test: %.0fm - %.0fm\n", trackpoint.Distance, trackpoint.Altitude)
 	}
 }
