@@ -123,8 +123,19 @@ func main() {
 	canvas := svg.New(file)
 	canvas.Start(width, height)
 
+	var prev Data
+	fmt.Printf("%+v", height)
+
 	for _, trackpoint := range data {
-		canvas.Line(int(trackpoint.Distance), height-int(trackpoint.Altitude-minAltitude)*5, int(trackpoint.Distance), height, "stroke:black")
+		if prev.Distance == 0 && prev.Altitude == 0 {
+			prev = trackpoint
+			continue
+		}
+		canvas.Polygon(
+			[]int{int(prev.Distance), int(prev.Distance), int(trackpoint.Distance), int(trackpoint.Distance)},
+			[]int{height - int(prev.Altitude-minAltitude)*5, height, height, height - int(trackpoint.Altitude-minAltitude)*5},
+			"stroke:black;fill:green")
+		prev = trackpoint
 	}
 
 	canvas.End()
