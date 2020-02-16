@@ -62,6 +62,9 @@ func main() {
 	lap := activity.Laps[*lapId]
 
 	for _, trackpoint := range lap.Trk.Pt {
-		fmt.Printf("test: %.0fm - %.0fm\n", trackpoint.Dist, trackpoint.Alt)
+		// remove invalid trackpoints from tcx parsing
+		if trackpoint.Alt != 0 {
+			fmt.Printf("test: %.0fm - %.0fm\n", trackpoint.Dist, trackpoint.Alt)
+		}
 	}
 }
