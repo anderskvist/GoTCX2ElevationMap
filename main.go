@@ -26,11 +26,13 @@ func showAll(db *tcx.TCXDB) {
 	}
 }
 
+// Data is a struct to hold relevant data
 type Data struct {
 	Distance float64
 	Altitude float64
 }
 
+// ByDistance is a sorting helper
 type ByDistance []Data
 
 func (a ByDistance) Len() int           { return len(a) }
