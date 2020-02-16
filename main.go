@@ -10,11 +10,6 @@ import (
 	tcx "github.com/philhofer/tcx"
 )
 
-var (
-	activity = 0
-	lap      = 2
-)
-
 func showAll(db *tcx.TCXDB) {
 	for id, act := range db.Acts.Act {
 		fmt.Printf("Activity id: %d\n", id)
