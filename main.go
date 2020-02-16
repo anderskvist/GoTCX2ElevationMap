@@ -30,7 +30,7 @@ func showAll(db *tcx.TCXDB) {
 func deleteOne(data []Data) []Data {
 	var prev Data
 	var smallestDist = 9999.0
-	var smallestId = 0
+	var smallestID = 0
 
 	for id, temp := range data {
 		if prev.Distance == 0 && prev.Altitude == 0 {
@@ -42,12 +42,12 @@ func deleteOne(data []Data) []Data {
 
 		if calcDist < smallestDist {
 			smallestDist = calcDist
-			smallestId = id
+			smallestID = id
 		}
 		prev = temp
 	}
 
-	copy(data[smallestId:], data[smallestId+1:]) // Shift a[i+1:] left one index.
+	copy(data[smallestID:], data[smallestID+1:]) // Shift a[i+1:] left one index.
 	data[len(data)-1] = Data{}                   // Erase last element (write zero value).
 	data = data[:len(data)-1]                    // Truncate slice.
 
