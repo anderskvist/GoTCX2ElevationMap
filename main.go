@@ -154,7 +154,7 @@ func main() {
 		os.Exit(4)
 	}
 
-	var magic int = 10
+	var magic = 10
 
 	width := int(maxDistance)
 	height := int(maxAltitude-minAltitude) * magic
