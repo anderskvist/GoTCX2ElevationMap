@@ -126,17 +126,38 @@ func main() {
 	canvas.Start(width, height)
 
 	var prev Data
-	fmt.Printf("%+v", height)
 
 	for _, trackpoint := range data {
+		// skip the first trackpoint and set it to previous - needed for drawing polygons
 		if prev.Distance == 0 && prev.Altitude == 0 {
 			prev = trackpoint
 			continue
 		}
+
+		var gradient = ((trackpoint.Altitude - prev.Altitude) / (trackpoint.Distance - prev.Distance)) * 100
+
+		var color string
+		switch {
+		case gradient < -15:
+			color = "#0000ff"
+		case gradient < -10:
+			color = "#0088ff"
+		case gradient < -5:
+			color = "#00ff88"
+		case gradient < 5:
+			color = "#00ff00"
+		case gradient < 10:
+			color = "#88ff00"
+		case gradient < 15:
+			color = "#ff8800"
+		case gradient >= 15:
+			color = "#ff0000"
+		}
+
 		canvas.Polygon(
 			[]int{int(prev.Distance), int(prev.Distance), int(trackpoint.Distance), int(trackpoint.Distance)},
 			[]int{height - int(prev.Altitude-minAltitude)*magic, height, height, height - int(trackpoint.Altitude-minAltitude)*magic},
-			"stroke:black;fill:green")
+			"stroke:black;fill:"+color)
 		prev = trackpoint
 	}
 
