@@ -76,9 +76,18 @@ func main() {
 	data := []Data{}
 
 	for _, trackpoint := range lap.Trk.Pt {
+		doubletFound := false
 		// remove invalid trackpoints from tcx parsing
 		if trackpoint.Alt != 0 {
-			data = append(data, Data{Distance: trackpoint.Dist, Altitude: trackpoint.Alt})
+			for _, temp := range data {
+				if trackpoint.Dist == temp.Distance {
+					doubletFound = true
+					continue
+				}
+			}
+			if doubletFound == false {
+				data = append(data, Data{Distance: trackpoint.Dist, Altitude: trackpoint.Alt})
+			}
 		}
 	}
 
