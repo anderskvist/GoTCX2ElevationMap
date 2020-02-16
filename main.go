@@ -40,8 +40,8 @@ func (a ByDistance) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func main() {
 
 	var tcxFile = flag.String("t", "", "TCX file to be read")
-	var activityId = flag.Int("a", -1, "Activity for elevation map")
-	var lapId = flag.Int("l", -1, "Lap for elevation map")
+	var activityID = flag.Int("a", -1, "Activity for elevation map")
+	var lapID = flag.Int("l", -1, "Lap for elevation map")
 	flag.Parse()
 
 	if *tcxFile == "" {
@@ -54,24 +54,24 @@ func main() {
 		fmt.Print(err)
 	}
 
-	if *activityId < 0 || *lapId < 0 {
+	if *activityID < 0 || *lapID < 0 {
 		showAll(db)
 		os.Exit(0)
 	}
 
-	if *activityId >= len(db.Acts.Act) {
+	if *activityID >= len(db.Acts.Act) {
 		fmt.Println("ActivityId does not exist.")
 		os.Exit(2)
 	}
 
-	activity := db.Acts.Act[*activityId]
+	activity := db.Acts.Act[*activityID]
 
-	if *lapId >= len(activity.Laps) {
+	if *lapID >= len(activity.Laps) {
 		fmt.Println("LapId does not exist.")
 		os.Exit(3)
 	}
 
-	lap := activity.Laps[*lapId]
+	lap := activity.Laps[*lapID]
 
 	data := []Data{}
 
