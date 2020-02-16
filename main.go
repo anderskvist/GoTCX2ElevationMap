@@ -118,8 +118,10 @@ func main() {
 		os.Exit(4)
 	}
 
+	var magic int = 10
+
 	width := int(maxDistance)
-	height := int(maxAltitude-minAltitude) * 5
+	height := int(maxAltitude-minAltitude) * magic
 	canvas := svg.New(file)
 	canvas.Start(width, height)
 
@@ -133,7 +135,7 @@ func main() {
 		}
 		canvas.Polygon(
 			[]int{int(prev.Distance), int(prev.Distance), int(trackpoint.Distance), int(trackpoint.Distance)},
-			[]int{height - int(prev.Altitude-minAltitude)*5, height, height, height - int(trackpoint.Altitude-minAltitude)*5},
+			[]int{height - int(prev.Altitude-minAltitude)*magic, height, height, height - int(trackpoint.Altitude-minAltitude)*magic},
 			"stroke:black;fill:green")
 		prev = trackpoint
 	}
