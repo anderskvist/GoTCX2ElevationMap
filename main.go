@@ -80,6 +80,7 @@ func main() {
 		// remove invalid trackpoints from tcx parsing
 		if trackpoint.Alt != 0 {
 			for _, temp := range data {
+				// skip doublets to minimize our data
 				if trackpoint.Dist == temp.Distance {
 					doubletFound = true
 					continue
