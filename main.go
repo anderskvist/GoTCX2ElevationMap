@@ -6,6 +6,7 @@ import (
 	"os"
 	"sort"
 
+	svg "github.com/ajstarks/svgo"
 	tcx "github.com/philhofer/tcx"
 )
 
@@ -77,7 +78,13 @@ func main() {
 
 	data := []Data{}
 
+	// variables for holding min and max altitude - initialized with extremes to make sure they are overwritten
+	var minAltitude float64 = 9999
+	var maxAltitude float64 = -9999
+	var maxDistance float64 = lap.Trk.Pt[len(lap.Trk.Pt)-1].Dist
+
 	for _, trackpoint := range lap.Trk.Pt {
+
 		doubletFound := false
 		// remove invalid trackpoints from tcx parsing
 		if trackpoint.Alt != 0 {
@@ -90,6 +97,14 @@ func main() {
 			}
 			if doubletFound == false {
 				data = append(data, Data{Distance: trackpoint.Dist, Altitude: trackpoint.Alt})
+
+				// find min and max altitudes
+				if trackpoint.Alt > maxAltitude {
+					maxAltitude = trackpoint.Alt
+				}
+				if trackpoint.Alt < minAltitude {
+					minAltitude = trackpoint.Alt
+				}
 			}
 		}
 	}
@@ -97,7 +112,20 @@ func main() {
 	// for some reason, the TCX trackpoint data isn't in the correct order, so we need to sort it to make sure it's okay
 	sort.Sort(ByDistance(data))
 
-	for _, trackpoint := range data {
-		fmt.Printf("test: %.0fm - %.0fm\n", trackpoint.Distance, trackpoint.Altitude)
+	file, err := os.Create("test.svg")
+	if err != nil {
+		fmt.Println("Cannot write to test.svg")
+		os.Exit(4)
 	}
+
+	width := int(maxDistance)
+	height := int(maxAltitude-minAltitude) * 5
+	canvas := svg.New(file)
+	canvas.Start(width, height)
+
+	for _, trackpoint := range data {
+		canvas.Line(int(trackpoint.Distance), height-int(trackpoint.Altitude-minAltitude)*5, int(trackpoint.Distance), height, "stroke:black")
+	}
+
+	canvas.End()
 }
