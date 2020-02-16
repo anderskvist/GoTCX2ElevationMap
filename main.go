@@ -44,8 +44,24 @@ func main() {
 
 	if *activityId < 0 || *lapId < 0 {
 		showAll(db)
+		os.Exit(0)
 	}
 
-	fmt.Printf("%+v\n", db.Acts.Act[*activityId])
+	if *activityId >= len(db.Acts.Act) {
+		fmt.Println("ActivityId does not exist.")
+		os.Exit(2)
+	}
 
+	activity := db.Acts.Act[*activityId]
+
+	if *lapId >= len(activity.Laps) {
+		fmt.Println("LapId does not exist.")
+		os.Exit(3)
+	}
+
+	lap := activity.Laps[*lapId]
+
+	for _, trackpoint := range lap.Trk.Pt {
+		fmt.Printf("test: %.0fm - %.0fm\n", trackpoint.Dist, trackpoint.Alt)
+	}
 }
