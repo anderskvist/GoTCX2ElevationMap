@@ -8,6 +8,8 @@ import (
 
 	svg "github.com/ajstarks/svgo"
 	tcx "github.com/philhofer/tcx"
+
+	color "github.com/anderskvist/GoTCX2ElevationMap/color"
 )
 
 func showAll(db *tcx.TCXDB) {
@@ -167,31 +169,12 @@ func main() {
 
 		var gradient = ((trackpoint.Altitude - prev.Altitude) / (trackpoint.Distance - prev.Distance)) * 100
 
-		var color string
-		switch {
-		case gradient < -15:
-			color = "#0000ff"
-		case gradient < -10:
-			color = "#0088ff"
-		case gradient < -5:
-			color = "#00ffff"
-		case gradient < -2:
-			color = "#00ff88"
-		case gradient < 2:
-			color = "#00ff00"
-		case gradient < 5:
-			color = "#88ff00"
-		case gradient < 10:
-			color = "#ffff00"
-		case gradient < 15:
-			color = "#ff8800"
-		case gradient >= 15:
-			color = "#ff0000"
-		}
+		c := color.Calc(gradient)
+
 		canvas.Polygon(
 			[]int{int(prev.Distance), int(prev.Distance), int(trackpoint.Distance), int(trackpoint.Distance)},
 			[]int{height - int(prev.Altitude-minAltitude)*magic, height, height, height - int(trackpoint.Altitude-minAltitude)*magic},
-			"stroke:black;fill:"+color)
+			"stroke:none;fill:"+c)
 		prev = trackpoint
 	}
 
