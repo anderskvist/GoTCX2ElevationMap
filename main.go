@@ -46,9 +46,7 @@ func deleteOne(data []Data) []Data {
 
 	copy(data[smallestID:], data[smallestID+1:]) // Shift a[i+1:] left one index.
 	data[len(data)-1] = Data{}                   // Erase last element (write zero value).
-	data = data[:len(data)-1]                    // Truncate slice.
-
-	return data
+	return data[:len(data)-1]                    // Truncate slice.
 }
 
 // Data is a struct to hold relevant data
