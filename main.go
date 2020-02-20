@@ -3,14 +3,19 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"sort"
 
 	svg "github.com/ajstarks/svgo"
 	tcx "github.com/philhofer/tcx"
+	"gopkg.in/yaml.v2"
 
 	color "github.com/anderskvist/GoTCX2ElevationMap/color"
 )
+
+var scale float64
+var fontsize float64
 
 func showAll(db *tcx.TCXDB) {
 	for id, act := range db.Acts.Act {
@@ -60,6 +65,12 @@ type Data struct {
 	Altitude float64
 }
 
+// Label is a struct to hold labels data
+type Label struct {
+	Dist  int    `yaml:"dist"`
+	Label string `yaml:"label"`
+}
+
 // ByDistance is a sorting helper
 type ByDistance []Data
 
@@ -70,8 +81,11 @@ func (a ByDistance) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func main() {
 
 	var tcxFile = flag.String("t", "", "TCX file to be read")
+	var labelsFile = flag.String("labels", "", "Labels file to be read")
 	var info = flag.Bool("i", false, "Show TCX file info")
 	var simplify = flag.Int("s", -1, "Simplify by removing N% of trackpoints")
+	flag.Float64Var(&scale, "scale", 10.0, "Downscale the image by this value")
+	flag.Float64Var(&fontsize, "fontsize", 20.0, "Fontsize for labels")
 
 	flag.Parse()
 
@@ -85,6 +99,21 @@ func main() {
 		fmt.Print(err)
 	}
 
+	labels := []Label{}
+
+	if *labelsFile != "" {
+		temp, err := ioutil.ReadFile(*labelsFile)
+		if err != nil {
+			fmt.Print(err)
+			os.Exit(1)
+		}
+
+		err = yaml.Unmarshal(temp, &labels)
+		if err != nil {
+			fmt.Print(err)
+			os.Exit(1)
+		}
+	}
 	if *info {
 		showAll(db)
 		os.Exit(0)
@@ -145,7 +174,6 @@ func main() {
 	}
 
 	var magic = 10
-	var scale = 10.0
 
 	width := int(maxDistance / scale)
 	height := int(maxAltitude-minAltitude) * magic
@@ -171,6 +199,21 @@ func main() {
 			"stroke:none;fill:"+c)
 		prev = trackpoint
 	}
+
+	// Add labels
+	for _, label := range labels {
+		addLabel(*canvas, label.Dist, height+10*int(scale), label.Label)
+	}
+
 	canvas.Gend()
 	canvas.End()
+}
+
+func addLabel(canvas svg.SVG, x int, y int, text string) {
+	canvas.Translate(x, y)
+	canvas.Rotate(15)
+	canvas.Circle(0, 0, 20)
+	canvas.Text(int(fontsize)*2, int(fontsize)*2, text, "font-size:"+fmt.Sprintf("%f", fontsize*scale)+";font-family:Sans-serif")
+	canvas.Gend()
+	canvas.Gend()
 }
