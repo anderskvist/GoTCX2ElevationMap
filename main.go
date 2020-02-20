@@ -145,11 +145,13 @@ func main() {
 	}
 
 	var magic = 10
+	var scale = 10.0
 
-	width := int(maxDistance)
+	width := int(maxDistance / scale)
 	height := int(maxAltitude-minAltitude) * magic
 	canvas := svg.New(file)
 	canvas.Start(width, height)
+	canvas.ScaleXY(1/scale, 1/scale)
 	var prev Data
 
 	for _, trackpoint := range data {
@@ -169,6 +171,6 @@ func main() {
 			"stroke:none;fill:"+c)
 		prev = trackpoint
 	}
-
+	canvas.Gend()
 	canvas.End()
 }
