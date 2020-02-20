@@ -65,8 +65,7 @@ func (a ByDistance) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func main() {
 
 	var tcxFile = flag.String("t", "", "TCX file to be read")
-	var activityID = flag.Int("a", -1, "Activity for elevation map")
-	var lapID = flag.Int("l", -1, "Lap for elevation map")
+	var info = flag.Bool("i", false, "Show TCX file info")
 	var simplify = flag.Int("s", -1, "Simplify by removing N% of trackpoints")
 
 	flag.Parse()
@@ -81,58 +80,47 @@ func main() {
 		fmt.Print(err)
 	}
 
-	if *activityID < 0 || *lapID < 0 {
+	if *info {
 		showAll(db)
 		os.Exit(0)
 	}
-
-	if *activityID >= len(db.Acts.Act) {
-		fmt.Println("ActivityId does not exist.")
-		os.Exit(2)
-	}
-
-	activity := db.Acts.Act[*activityID]
-
-	if *lapID >= len(activity.Laps) {
-		fmt.Println("LapId does not exist.")
-		os.Exit(3)
-	}
-
-	lap := activity.Laps[*lapID]
 
 	data := []Data{}
 
 	// variables for holding min and max altitude - initialized with extremes to make sure they are overwritten
 	var minAltitude float64 = 9999
 	var maxAltitude float64 = -9999
-	var maxDistance float64 = lap.Trk.Pt[len(lap.Trk.Pt)-1].Dist
+	var maxDistance float64 = data[len(data)-1].Distance
 
-	for _, trackpoint := range lap.Trk.Pt {
+	for _, activity := range db.Acts.Act {
+		for _, lap := range activity.Laps {
+			for _, trackpoint := range lap.Trk.Pt {
 
-		doubletFound := false
-		// remove invalid trackpoints from tcx parsing
-		if trackpoint.Alt != 0 {
-			for _, temp := range data {
-				// skip doublets to minimize our data
-				if trackpoint.Dist == temp.Distance {
-					doubletFound = true
-					continue
-				}
-			}
-			if doubletFound == false {
-				data = append(data, Data{Distance: trackpoint.Dist, Altitude: trackpoint.Alt})
+				doubletFound := false
+				// remove invalid trackpoints from tcx parsing
+				if trackpoint.Alt != 0 {
+					for _, temp := range data {
+						// skip doublets to minimize our data
+						if trackpoint.Dist == temp.Distance {
+							doubletFound = true
+							continue
+						}
+					}
+					if doubletFound == false {
+						data = append(data, Data{Distance: trackpoint.Dist, Altitude: trackpoint.Alt})
 
-				// find min and max altitudes
-				if trackpoint.Alt > maxAltitude {
-					maxAltitude = trackpoint.Alt
-				}
-				if trackpoint.Alt < minAltitude {
-					minAltitude = trackpoint.Alt
+						// find min and max altitudes
+						if trackpoint.Alt > maxAltitude {
+							maxAltitude = trackpoint.Alt
+						}
+						if trackpoint.Alt < minAltitude {
+							minAltitude = trackpoint.Alt
+						}
+					}
 				}
 			}
 		}
 	}
-
 	// for some reason, the TCX trackpoint data isn't in the correct order, so we need to sort it to make sure it's okay
 	sort.Sort(ByDistance(data))
 
@@ -155,7 +143,6 @@ func main() {
 	height := int(maxAltitude-minAltitude) * magic
 	canvas := svg.New(file)
 	canvas.Start(width, height)
-
 	var prev Data
 
 	for _, trackpoint := range data {
