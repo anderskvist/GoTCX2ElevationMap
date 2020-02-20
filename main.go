@@ -200,12 +200,13 @@ func main() {
 		os.Exit(4)
 	}
 
-	var magic = 10
+	var magic = 20
 
-	width := int(maxDistance / scale)
+	width := int(maxDistance/scale) + 200
 	height := 200 + int(maxAltitude-minAltitude)*magic
 	canvas := svg.New(file)
 	canvas.Start(width, height)
+	canvas.Translate(100, 100)
 	canvas.ScaleXY(1/scale, 1/scale)
 	var prev Data
 
@@ -236,6 +237,7 @@ func main() {
 		addHeight(*canvas, heightp.Dist, 200, fmt.Sprintf("%.0fm", getHeight(data, heightp.Dist)))
 	}
 
+	canvas.Gend()
 	canvas.Gend()
 	canvas.End()
 }
