@@ -121,7 +121,7 @@ func main() {
 		}
 	}
 
-	var maxDistance float64 = data[len(data)-1].Distance
+	var maxDistance = data[len(data)-1].Distance
 
 	// for some reason, the TCX trackpoint data isn't in the correct order, so we need to sort it to make sure it's okay
 	sort.Sort(ByDistance(data))
