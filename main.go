@@ -206,9 +206,14 @@ func main() {
 	height := 200 + int(maxAltitude-minAltitude)*magic
 	canvas := svg.New(file)
 	canvas.Start(width, height)
+	canvas.Rect(0, 0, width, height, "fill:#eee")
 	canvas.Translate(100, 100)
 	canvas.ScaleXY(1/scale, 1/scale)
 	var prev Data
+
+	for i := 0; i <= 10000; i = i + 1000 {
+		canvas.Line(i, 0, i, int(maxAltitude-minAltitude)*magic, "stroke:#bbb;stroke-width:"+fmt.Sprint(scale/2))
+	}
 
 	for _, trackpoint := range data {
 		// skip the first trackpoint and set it to previous - needed for drawing polygons
