@@ -44,6 +44,11 @@ func deleteOne(data []Data) []Data {
 		prev = temp
 	}
 
+	// check if it's the last point, in that case, delete the second to last.
+	if smallestID == len(data)-1 {
+		smallestID--
+	}
+
 	copy(data[smallestID:], data[smallestID+1:]) // Shift a[i+1:] left one index.
 	data[len(data)-1] = Data{}                   // Erase last element (write zero value).
 	return data[:len(data)-1]                    // Truncate slice.
