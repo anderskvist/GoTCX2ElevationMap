@@ -59,16 +59,36 @@ func deleteOne(data []Data) []Data {
 	return data[:len(data)-1]                    // Truncate slice.
 }
 
+func getHeight(data []Data, dist int) float64 {
+	for _, temp := range data {
+		if temp.Distance > float64(dist) {
+			return temp.Altitude
+		}
+	}
+	return -1
+}
+
 // Data is a struct to hold relevant data
 type Data struct {
 	Distance float64
 	Altitude float64
 }
 
-// Label is a struct to hold labels data
-type Label struct {
+// Attributes is to hold extra information about the elevation map as height and labelpoints
+type Attributes struct {
+	LabelPoint  []LabelPoint  `yaml:"labelpoint"`
+	HeightPoint []HeightPoint `yaml:"heightpoint"`
+}
+
+// LabelPoint is a struct to hold labels data
+type LabelPoint struct {
 	Dist  int    `yaml:"dist"`
 	Label string `yaml:"label"`
+}
+
+// HeightPoint is a struct to hold height points
+type HeightPoint struct {
+	Dist int `yaml:"dist"`
 }
 
 // ByDistance is a sorting helper
@@ -100,7 +120,7 @@ func main() {
 		fmt.Print(err)
 	}
 
-	labels := []Label{}
+	attributes := Attributes{}
 
 	if *labelsFile != "" {
 		temp, err := ioutil.ReadFile(*labelsFile)
@@ -109,12 +129,13 @@ func main() {
 			os.Exit(1)
 		}
 
-		err = yaml.Unmarshal(temp, &labels)
+		err = yaml.Unmarshal(temp, &attributes)
 		if err != nil {
 			fmt.Print(err)
 			os.Exit(1)
 		}
 	}
+
 	if *info {
 		showAll(db)
 		os.Exit(0)
@@ -182,7 +203,7 @@ func main() {
 	var magic = 10
 
 	width := int(maxDistance / scale)
-	height := int(maxAltitude-minAltitude) * magic
+	height := 200 + int(maxAltitude-minAltitude)*magic
 	canvas := svg.New(file)
 	canvas.Start(width, height)
 	canvas.ScaleXY(1/scale, 1/scale)
@@ -207,8 +228,12 @@ func main() {
 	}
 
 	// Add labels
-	for _, label := range labels {
+	for _, label := range attributes.LabelPoint {
 		addLabel(*canvas, label.Dist, height+10*int(scale), label.Label)
+	}
+
+	for _, heightp := range attributes.HeightPoint {
+		addHeight(*canvas, heightp.Dist, 200, fmt.Sprintf("%.0fm", getHeight(data, heightp.Dist)))
 	}
 
 	canvas.Gend()
@@ -220,6 +245,14 @@ func addLabel(canvas svg.SVG, x int, y int, text string) {
 	canvas.Rotate(15)
 	canvas.Circle(0, 0, 20)
 	canvas.Text(int(fontsize)*2, int(fontsize)*2, text, "font-size:"+fmt.Sprintf("%f", fontsize*scale)+";font-family:Sans-serif")
+	canvas.Gend()
+	canvas.Gend()
+}
+
+func addHeight(canvas svg.SVG, x int, y int, text string) {
+	canvas.Translate(x, y)
+	canvas.Rotate(-90)
+	canvas.Text(0, int(fontsize*scale)/2, text, "font-size:"+fmt.Sprintf("%f", fontsize*scale)+";font-family:Sans-serif")
 	canvas.Gend()
 	canvas.Gend()
 }
