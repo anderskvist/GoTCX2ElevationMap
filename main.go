@@ -86,6 +86,7 @@ func main() {
 	var simplify = flag.Int("s", -1, "Simplify by removing N% of trackpoints")
 	flag.Float64Var(&scale, "scale", 10.0, "Downscale the image by this value")
 	flag.Float64Var(&fontsize, "fontsize", 20.0, "Fontsize for labels")
+	var distLimit = flag.Float64("dist-limit", -1, "Limit distance")
 
 	flag.Parse()
 
@@ -140,6 +141,11 @@ func main() {
 						}
 					}
 					if doubletFound == false {
+						if *distLimit > 0 {
+							if trackpoint.Dist > *distLimit {
+								break
+							}
+						}
 						data = append(data, Data{Distance: trackpoint.Dist, Altitude: trackpoint.Alt})
 
 						// find min and max altitudes
