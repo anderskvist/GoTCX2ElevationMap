@@ -90,7 +90,6 @@ func main() {
 	// variables for holding min and max altitude - initialized with extremes to make sure they are overwritten
 	var minAltitude float64 = 9999
 	var maxAltitude float64 = -9999
-	var maxDistance float64 = data[len(data)-1].Distance
 
 	for _, activity := range db.Acts.Act {
 		for _, lap := range activity.Laps {
@@ -121,6 +120,9 @@ func main() {
 			}
 		}
 	}
+
+	var maxDistance float64 = data[len(data)-1].Distance
+
 	// for some reason, the TCX trackpoint data isn't in the correct order, so we need to sort it to make sure it's okay
 	sort.Sort(ByDistance(data))
 
